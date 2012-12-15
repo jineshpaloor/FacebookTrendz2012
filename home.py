@@ -1,21 +1,69 @@
-import os
-import sys
-import webbrowser
 import urllib
 
-from flask import Flask, render_template
+#from flask import Flask, , redirect, request
+from flask import Flask, redirect, url_for, session, request, render_template
+from flask_oauth import OAuth
+
+REDIRECT_URI = 'http://127.0.0.1:5000/accesstoken'
+SECRET_KEY = 'development key'
+DEBUG = True
+FACEBOOK_APP_ID = '453146034732597'
+FACEBOOK_APP_SECRET = '83459d1711daff7eaeb6412f635e5abc'
 
 app = Flask(__name__)
+app.debug = DEBUG
+app.secret_key = SECRET_KEY
+oauth = OAuth()
 
-CLIENT_ID = '453146034732597'
 
-REDIRECT_URI = 'http://127.0.0.1:5000/'
+facebook = oauth.remote_app('facebook',
+    base_url='https://graph.facebook.com/',
+    request_token_url=None,
+    access_token_url='/oauth/access_token',
+    authorize_url='https://www.facebook.com/dialog/oauth',
+    consumer_key=FACEBOOK_APP_ID,
+    consumer_secret=FACEBOOK_APP_SECRET,
+    request_token_params={'scope': 'email'}
+)
 
 @app.route('/')
 def home():
     return render_template('home.html')
 
 @app.route('/accesstoken')
+def use_access_token():
+    print 'got response from facebook ::'
+    print 'args  :',request.args.__dict__
+    return render_template('details.html')
+
+
+@app.route('/get_accesstoken')
+def login():
+    return facebook.authorize(callback=url_for('facebook_authorized',
+        next=request.args.get('next') or request.referrer or None,
+        _external=True))
+
+
+@app.route('/login/authorized')
+@facebook.authorized_handler
+def facebook_authorized(resp):
+    if resp is None:
+        return 'Access denied: reason=%s error=%s' % (
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+    session['oauth_token'] = (resp['access_token'], '')
+    me = facebook.get('/me')
+    return 'Logged in as id=%s name=%s redirect=%s' % \
+        (me.data['id'], me.data['name'], request.args.get('next'))
+
+
+@facebook.tokengetter
+def get_facebook_oauth_token():
+    return session.get('oauth_token')
+
+
+@app.route('/get_accesstoken_old')
 def get_access_token():
 
     # Get this value from your Facebook application's settings
@@ -75,31 +123,13 @@ def get_access_token():
         'friends_checkins',
         ]
 
-    args = dict(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI,
-                scope=','.join(EXTENDED_PERMS), type='user_agent', display='popup'
-                )
+    args = dict(client_id=FACEBOOK_APP_ID, redirect_uri=REDIRECT_URI,
+                scope=','.join(EXTENDED_PERMS), type='user_agent', display='popup')
 
-    webbrowser.open('https://graph.facebook.com/oauth/authorize?'
+
+    return redirect('https://graph.facebook.com/oauth/authorize?'
                     + urllib.urlencode(args))
 
-    # Optionally, store your access token locally for convenient use as opposed
-    # to passing it as a command line parameter into scripts...
-
-#    access_token = raw_input('Enter your access_token: ')
-
-#    if not os.path.isdir('out'):
-#        os.mkdir('out')
-#
-#    filename = os.path.join('out', 'facebook.access_token')
-#    f = open(filename, 'w')
-#    f.write(access_token)
-#    f.close()
-#
-#    print >> sys.stderr, \
-#            "Access token stored to local file: 'out/facebook.access_token'"
-
-#    return access_token
-    return render_template('details.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
