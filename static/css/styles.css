@@ -7,16 +7,6 @@ body{
     width: 100%;
 }
 
-.content {
-    width: 500px;
-    height: 400px;
-    margin: 50px auto 0px auto;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0px 0px 20px #777;
-}
-
 #name-header{
     text-align:center;
     margin: 10px auto 0px auto;
@@ -26,37 +16,35 @@ body{
     height: 30px;
 }
 
-#body-content {
-    height:310px;
-    padding: 10px 20px;
-    border-bottom: 1px dashed #ccc;
-    overflow-y: auto;
-    overflow-x: hidden;
+#header-div{
+    width: 940px;
+    margin: auto;
+    text-align: center;
+    margin-top: 30px;
 }
 
-#links-ul { 
+.trend-header{
+    text-align: center;
+    margin: 30px 0px;
+    color: #FFAD00;
+}
+
+.trend-list { 
     list-style-type:none;
-    margin:auto;
     padding:0;
-    height:30px;
-    font-family:Arial;
     font-size:0.9em;
-    width: 350px;
 }
-#links-ul li {
-    float:left;
-    height:30px;
-    line-height:30px;
+
+.trend-list li {
     text-align:center;
+    margin:30px 0px;
+    border: 1px solid #ccc;
 }
-#links-ul li a {
+
+.trend-list li a {
     display:block;
     color: #06266F;
     padding:0 20px;
     text-decoration:none;
 }
-#links-ul li a:hover {
-    font-size:16px;
-    color: #1240AB;
-    text-decoration:none;
-}
+

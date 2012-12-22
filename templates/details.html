@@ -1,8 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Got access token</h2>
+<h1 class="trend-header">Most liked 30 photos of my friends</h1>
+<ul class="trend-list">
 {% for photo in fb_liked_photos %}
-<a href="{{ photo.link }}" target="_blank"><img src="{{ photo.src_small }}" /></a>
+    <li>
+    <h2>{{ photo.caption }}</h2>
+    <a href="{{ photo.link }}" target="_blank"><img src="{{ photo.src_big }}" /></a>
+    <a href="{{ photo.link }}" target="_blank">View original post</a>
+    <p><strong>Likes: {{ photo.like_info.like_count }}</strong></p>
+    </li>
 {% endfor %}
+</ul>
 {% endblock %}

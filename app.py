@@ -111,14 +111,14 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/get_accesstoken')
-def get_access_token():
+@app.route('/get_photos')
+def get_photos():
     return facebook.authorize(callback=url_for('facebook_authorized',
         next=request.args.get('next') or request.referrer or None,
         _external=True))
 
 
-@app.route('/login/authorized')
+@app.route('/fb/photos')
 @facebook.authorized_handler
 def facebook_authorized(resp):
     if resp is None:
@@ -132,19 +132,15 @@ def facebook_authorized(resp):
 #    current_dir = os.path.realpath(__file__)
     current_dir = os.getcwd()
     filepath = str(current_dir)+'/cache/'+str(access_token)+'.txt'
-    print '*'*50
-    print filepath
     if os.path.exists(filepath):
-        print 'path exits.....'
         with open(filepath, 'r') as fp:
             fb_liked_photos = fp.read()
-            print json.loads(fb_liked_photos)
+            fb_liked_photos = json.loads(fb_liked_photos)
     else:
-        print 'path not exits.....'
         #query to get liked photos of user and his friends
-        liked_photos_query = "SELECT pid, caption, aid, owner, link, src_big, src_small, created, modified, like_info FROM photo WHERE aid IN \
+        liked_photos_query = "SELECT pid, caption, aid, owner, link, src_big, src_small, created, modified, like_info FROM photo WHERE created > 1325356200 and aid IN \
             (SELECT aid FROM album WHERE owner IN \
-            (SELECT uid2 FROM friend WHERE uid1=me()))"
+            (SELECT uid2 FROM friend WHERE uid1=me()))ORDER BY like_info.like_count DESC LIMIT 30"
 
         data = {'q':liked_photos_query, 'access_token':access_token}
         encode_data = urllib.urlencode(data)
