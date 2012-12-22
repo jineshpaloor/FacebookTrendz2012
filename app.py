@@ -1,3 +1,7 @@
+import urllib, urllib2
+#import requests
+import json
+
 from flask import Flask, url_for, session, request, render_template
 from flask_oauth import OAuth
 
@@ -124,7 +128,16 @@ def facebook_authorized(resp):
     session['oauth_token'] = (resp['access_token'], '')
     access_token = resp['access_token']
     query = "SELECT user_id, object_id, object_type, post_id FROM like WHERE user_id=me() AND object_type = 'photo'"
-    query_url = 'https://graph.facebook.com/fql?q=%s&access_token=' %(urlencode(query),access_token)
+    print 'query  :', query
+    data = {'q':query, 'access_token':access_token}
+    print urllib.urlencode(data)
+    print 'https://graph.facebook.com/fql?%s' % urllib.urlencode(data)
+    query_url = 'https://graph.facebook.com/fql?%s' % urllib.urlencode(data)
+    fetch_data = urllib2.urlopen(query_url)
+    json_data = json.load(fetch_data)
+    fetch_data.close()
+    print 'facebook data :\n', json_data
+
 
     return render_template('details.html')
 
