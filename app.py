@@ -122,17 +122,16 @@ def facebook_authorized(resp):
             request.args['error_description']
         )
     session['oauth_token'] = (resp['access_token'], '')
-    print 'token   :',session['oauth_token']
-    me = facebook.get('/me')
-    return 'Logged in as id=%s name=%s redirect=%s' % \
-        (me.data['id'], me.data['name'], request.args.get('next'))
+    access_token = resp['access_token']
+    query = "SELECT user_id, object_id, object_type, post_id FROM like WHERE user_id=me() AND object_type = 'photo'"
+    query_url = 'https://graph.facebook.com/fql?q=%s&access_token=' %(urlencode(query),access_token)
+
+    return render_template('details.html')
 
 
 @facebook.tokengetter
 def get_facebook_oauth_token():
     return session.get('oauth_token')
-
-
 
 
 if __name__ == '__main__':
