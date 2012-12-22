@@ -1,3 +1,4 @@
+import os
 import urllib, urllib2
 #import requests
 import json
@@ -127,19 +128,35 @@ def facebook_authorized(resp):
         )
     session['oauth_token'] = (resp['access_token'], '')
     access_token = resp['access_token']
-    query = "SELECT user_id, object_id, object_type, post_id FROM like WHERE user_id=me() AND object_type = 'photo'"
-    print 'query  :', query
-    data = {'q':query, 'access_token':access_token}
-    print urllib.urlencode(data)
-    print 'https://graph.facebook.com/fql?%s' % urllib.urlencode(data)
-    query_url = 'https://graph.facebook.com/fql?%s' % urllib.urlencode(data)
-    fetch_data = urllib2.urlopen(query_url)
-    json_data = json.load(fetch_data)
-    fetch_data.close()
-    print 'facebook data :\n', json_data
 
+#    current_dir = os.path.realpath(__file__)
+    current_dir = os.getcwd()
+    filepath = str(current_dir)+'/cache/'+str(access_token)+'.txt'
+    print '*'*50
+    print filepath
+    if os.path.exists(filepath):
+        print 'path exits.....'
+        with open(filepath, 'r') as fp:
+            fb_liked_photos = fp.read()
+            print json.loads(fb_liked_photos)
+    else:
+        print 'path not exits.....'
+        #query to get liked photos of user and his friends
+        liked_photos_query = "SELECT pid, caption, aid, owner, link, src_big, src_small, created, modified, like_info FROM photo WHERE aid IN \
+            (SELECT aid FROM album WHERE owner IN \
+            (SELECT uid2 FROM friend WHERE uid1=me()))"
 
-    return render_template('details.html')
+        data = {'q':liked_photos_query, 'access_token':access_token}
+        encode_data = urllib.urlencode(data)
+        query_url = 'https://graph.facebook.com/fql?%s' % encode_data
+        fetch_data = urllib2.urlopen(query_url)
+        fb_liked_photos = json.load(fetch_data)
+        fetch_data.close()
+
+        with open('cache/'+access_token+'.txt', 'w') as f:
+            f.write(json.dumps(fb_liked_photos))
+
+    return render_template('details.html', fb_liked_photos=fb_liked_photos['data'])
 
 
 @facebook.tokengetter

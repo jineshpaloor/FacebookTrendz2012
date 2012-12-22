@@ -2,4 +2,7 @@
 
 {% block content %}
 <h2>Got access token</h2>
+{% for photo in fb_liked_photos %}
+<a href="{{ photo.link }}" target="_blank"><img src="{{ photo.src_small }}" /></a>
+{% endfor %}
 {% endblock %}
