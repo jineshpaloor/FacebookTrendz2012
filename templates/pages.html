@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="trend-header">Most liked 30 pages</h1>
+<ul class="trend-list">
+{% for page in fb_liked_pages %}
+    <li>
+    <h2>{{ page.name }}</h2>
+    <a href="{{ page.pic_big }}" target="_blank"><img src="{{ page.pic_big }}" /></a>
+    <a href="{{ page.page_url }}" target="_blank">View page</a>
+    <p><strong>Fan Count: {{ page.fan_count }}</strong></p>
+    <p><strong>Website: <a href="{{ page.website }}" target="_blank">{{ page.website }}</a></strong></p>
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}
